@@ -28,6 +28,22 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
+def load_params(params_path : str) -> dict :
+    """Load parameters with yaml file"""
+    try :
+        with open(params_path, 'r') as file:
+            params = yaml.safe_load(file)
+        logger.debug('Parameters retrieved')
+        return params
+    except FileNotFoundError:
+        logger.error('File Not Found error')
+        raise
+    except yaml.YAMLError :
+        logger.error('Yaml error')
+        raise
+    except Exception as e:
+        logger.error('Error unexpected')
+        print(f"Error : {e}")
 
 def load_data(file_path: str) -> pd.DataFrame:
     """
@@ -102,7 +118,8 @@ def save_model(model, file_path: str) -> None:
 
 def main():
     try:
-        params = {'n_estimators' : 25, 'random_state' : 2}
+        parameters = load_params('params.yaml')
+        params = parameters['model_building']
         train_data = load_data('./data/processed/train_tfidf.csv')
         X_train = train_data.iloc[:, :-1].values
         y_train = train_data.iloc[:, -1].values
